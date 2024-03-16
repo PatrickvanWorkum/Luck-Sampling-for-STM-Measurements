@@ -1,0 +1,115 @@
+import os
+import matplotlib.pyplot as plt
+from scipy.stats import norm, poisson
+import numpy as np
+from tqdm.auto import tqdm
+import h5py
+
+
+directory_path = r"C:\Users\User\Documents\2024\project"
+os.chdir(directory_path)
+
+
+def import_h5py(input_file):
+    data = []
+    with h5py.File(input_file, "r") as hf:
+        for key in hf.keys():
+            dataset = hf[key]
+            for subkey in dataset.keys():
+                data.append(dataset[subkey][:])
+
+    return data
+
+
+def extract_per_pixel(data, pixels_co, sampling_rate=160):
+    multi = False
+    if len(pixels_co[0]) != 1:
+        multi = True
+
+    row_no, col_no = pixels_co
+    idx_nos = []
+    for idx_x, x in enumerate(row_no):
+        for idx_y, y in enumerate(col_no):
+            if idx_y == idx_x:
+                idx_no = (((x - 1) * PIXEL_DIM) + (y - 1)) * sampling_rate
+                idx_nos.append(idx_no)
+
+    data_filtered = []
+    for coeff in data:
+        pix_val = []
+        for idx, _ in enumerate(coeff):
+            if idx in idx_nos:
+                for offset in range(sampling_rate):
+                    pix_val.append(coeff[idx + offset])
+        data_filtered.append(pix_val)
+
+    return data_filtered, multi, idx_nos
+
+
+def plot_binned_data(data, MULTI_PIXEL_CHECK, saving_path):
+    BIN_NO = 20
+
+    if MULTI_PIXEL_CHECK == False:
+        plt.figure(figsize=(8, 6))
+
+        for i, coeff in tqdm(enumerate(data)):
+            bin_edges = np.linspace(min(coeff), max(coeff), BIN_NO)
+            mean, variance = norm.fit(coeff)
+
+            plt.subplot(1, 3, i % 3 + 1)
+            plt.hist(coeff, bins=bin_edges, edgecolor="black", alpha=0.75)
+
+            xmin, xmax = plt.xlim(mean - 5 * variance, mean + 5 * variance)
+
+            x = np.linspace(xmin, xmax, 100)
+            npdf = norm.pdf(x, mean, variance) * len(coeff) * np.diff(bin_edges)[0]
+
+            plt.plot(x, npdf, "r-", lw=2, label="Gaussian fit", alpha=0.5)
+
+            plt.axvline(mean, lw=2, label="Mean", color="grey", linestyle="--")
+
+            plt.xlabel("Binned snapshot values")
+            plt.ylabel("Frequency")
+            plt.title(f"Coefficient_{i+1}")
+            plt.tight_layout()
+            plt.legend()
+
+            if (i + 1) % 3 == 0:
+                # plt.show()
+                file_path = os.path.join(
+                    saving_path,
+                    f"coefficient_{i-1}&{i}&{i+1}_histogram_pixel_{PIXEL[0]}{PIXEL[1]}_bin{BIN_NO}.png",
+                )
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+                plt.savefig(file_path)
+                plt.clf()
+                # implement multi pixel plotting
+
+            if i == 30:
+                plt.show()
+                file_path = os.path.join(
+                    saving_path,
+                    f"coefficient_{i+1}_histogram_pixel_{PIXEL[0]}{PIXEL[1]}_bin{BIN_NO}.png",
+                )
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+                plt.savefig(file_path)
+
+                plt.clf()
+    else:
+        print("Need to implement this functionality")
+
+
+if __name__ == "__main__":
+
+    FILE = "./Data/Measurement_of_2021-06-18_1825.h5"
+    PATH = r"C:\Users\User\Documents\2024\project\figures"
+    PIXEL = [[2], [1]]
+    PIXEL_DIM = 50
+
+    data = import_h5py(FILE)
+    f_data = extract_per_pixel(data, PIXEL)
+    plot_binned_data(f_data[0], f_data[1], PATH)
