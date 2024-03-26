@@ -18,12 +18,12 @@ for file in directory_path:
         print("Not Valid file path")
 
 
-def import_h5py(input_file):
+def import_h5py(input_file, no_coeff):
     moduli = []
     real = []
     complex = []
     with h5py.File(input_file, "r") as hf:
-        for i in range(31):
+        for i in range(no_coeff):
             moduli.append(hf[f"/Coefficient_index_{i+1}/Modulus_coeff_{i+1}"][()])
             real.append(hf[f"/Coefficient_index_{i+1}/Real_coeff_{i+1}"][()])
             complex.append(hf[f"/Coefficient_index_{i+1}/Complex_coeff_{i+1}"][()])
@@ -118,16 +118,17 @@ def plot_binned_data(data, MULTI_PIXEL_CHECK, saving_path):
 
 if __name__ == "__main__":
 
-    FILE = "./Data/Measurement_of_2021-06-18_1825.h5"
-    PATH = r"C:\Users\User\Documents\2024\project\figures"
+    file = "./Data/Measurement_of_2021-06-18_1825.h5"
+    path = r"C:\Users\User\Documents\2024\project\figures"
     PIXEL = [[2], [1]]
     PIXEL_DIM = 50
+    NO_COEFF = 31
 
-    data = import_h5py(FILE)
+    data = import_h5py(input_file=file, no_coeff=NO_COEFF)
     data = np.array(data)
 
     real_f_data = extract_per_pixel(data[1], PIXEL)
     complex_f_data = extract_per_pixel(data[2], PIXEL)
 
-    plot_binned_data(real_f_data[0], real_f_data[1], PATH)
-    plot_binned_data(complex_f_data[0], complex_f_data[1], PATH)
+    plot_binned_data(real_f_data[0], real_f_data[1], path)
+    plot_binned_data(complex_f_data[0], complex_f_data[1], path)

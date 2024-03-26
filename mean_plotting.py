@@ -18,12 +18,12 @@ for file in directory_path:
         print("Not Valid file path")
 
 
-def import_h5py(input_file):
+def import_h5py(input_file, no_coeff):
     moduli = []
     real = []
     complex = []
     with h5py.File(input_file, "r") as hf:
-        for i in range(31):
+        for i in range(no_coeff):
             moduli.append(hf[f"/Coefficient_index_{i+1}/Modulus_coeff_{i+1}"][()])
             real.append(hf[f"/Coefficient_index_{i+1}/Real_coeff_{i+1}"][()])
             complex.append(hf[f"/Coefficient_index_{i+1}/Complex_coeff_{i+1}"][()])
@@ -31,17 +31,6 @@ def import_h5py(input_file):
     data = [moduli] + [real] + [complex]
     data = np.array(data)
     return data
-
-
-# def import_h5py(input_file):
-#     data = []
-#     with h5py.File(input_file, "r") as hf:
-#         for key in hf.keys():
-#             dataset = hf[key]
-#             for subkey in dataset.keys():
-#                 data.append(dataset[subkey][:])
-
-#     return data
 
 
 def o_mean(data, sampling_rate=160):
@@ -129,8 +118,9 @@ if __name__ == "__main__":
 
     file = "./Data/Measurement_of_2021-06-18_1825.h5"
     path = r"C:\Users\User\Documents\2024\project\figures"
+    NO_COEFF = 31
 
-    data = import_h5py(file)
+    data = import_h5py(input_file=file, no_coeff=NO_COEFF)
 
     mean_real = o_mean(data[1])
     mean_complex = o_mean(data=data[2])
