@@ -33,17 +33,6 @@ def import_h5py(input_file):
     return data
 
 
-# def import_h5py(input_file):
-#     data = []
-#     with h5py.File(input_file, "r") as hf:
-#         for key in hf.keys():
-#             dataset = hf[key]
-#             for subkey in dataset.keys():
-#                 data.append(dataset[subkey][:])
-
-#     return data
-
-
 def extract_per_pixel(data, pixels_co, sampling_rate=160):
     multi = False
     if len(pixels_co[0]) != 1:
@@ -101,7 +90,7 @@ def plot_binned_data(data, MULTI_PIXEL_CHECK, saving_path):
                 plt.show()
                 file_path = os.path.join(
                     saving_path,
-                    f"coefficient_{i-1}&{i}&{i+1}_histogram_pixel_{PIXEL[0]}{PIXEL[1]}_bin{BIN_NO}.png",
+                    f"coefficient_{i-1}&{i}&{i+1}_histogram_pixel_{PIXEL[0]}{PIXEL[1]}_bin{BIN_NO}_complex.png",
                 )
                 if os.path.exists(file_path):
                     os.remove(file_path)
@@ -115,7 +104,7 @@ def plot_binned_data(data, MULTI_PIXEL_CHECK, saving_path):
                 plt.show()
                 file_path = os.path.join(
                     saving_path,
-                    f"coefficient_{i+1}_histogram_pixel_{PIXEL[0]}{PIXEL[1]}_bin{BIN_NO}.png",
+                    f"coefficient_{i+1}_histogram_pixel_{PIXEL[0]}{PIXEL[1]}_bin{BIN_NO}_complex.png",
                 )
                 if os.path.exists(file_path):
                     os.remove(file_path)
