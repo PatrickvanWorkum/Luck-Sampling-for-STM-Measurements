@@ -5,21 +5,43 @@ from tqdm.auto import tqdm
 import h5py
 import re
 
-directory_path = r"C:\Users\User\Documents\2024\project"
-os.chdir(directory_path)
+directory_path = [
+    r"C:\Users\User\Documents\2024\project",
+    r"C:\Users\Patrick Van Workum\Documents\Python scripts",
+]
 
-pixel_dim = 50
+
+for file in directory_path:
+    try:
+        os.chdir(file)
+    except FileNotFoundError:
+        print("Not Valid file path")
 
 
 def import_h5py(input_file):
-    data = []
+    moduli = []
+    real = []
+    complex = []
     with h5py.File(input_file, "r") as hf:
-        for key in hf.keys():
-            dataset = hf[key]
-            for subkey in dataset.keys():
-                data.append(dataset[subkey][:])
+        for i in range(31):
+            moduli.append(hf[f"/Coefficient_index_{i+1}/Modulus_coeff_{i+1}"][()])
+            real.append(hf[f"/Coefficient_index_{i+1}/Real_coeff_{i+1}"][()])
+            complex.append(hf[f"/Coefficient_index_{i+1}/Complex_coeff_{i+1}"][()])
 
+    data = [moduli] + [real] + [complex]
+    data = np.array(data)
     return data
+
+
+# def import_h5py(input_file):
+#     data = []
+#     with h5py.File(input_file, "r") as hf:
+#         for key in hf.keys():
+#             dataset = hf[key]
+#             for subkey in dataset.keys():
+#                 data.append(dataset[subkey][:])
+
+#     return data
 
 
 def o_mean(data, sampling_rate=160):
@@ -83,9 +105,10 @@ def plotting_mean_specturms(data, saving_path):
         plt.grid(visible=False)
 
         if i % 2 == 1:
-            plt.show()
+            # plt.show()
             file_path = os.path.join(
-                saving_path, f"coefficient_{i}&{i+1}_median_values_harmonics_r.png"
+                saving_path,
+                f"coefficient_{i}&{i+1}_median_values_harmonics_r_complex.png",
             )
             if os.path.exists(file_path):
                 os.remove(file_path)
@@ -94,7 +117,7 @@ def plotting_mean_specturms(data, saving_path):
             plt.clf()
         if i == 30:
             file_path = os.path.join(
-                saving_path, f"coefficient_{i+1}_median_values_harmonics_r.png"
+                saving_path, f"coefficient_{i+1}_median_values_harmonics_r_complex.png"
             )
             if os.path.exists(file_path):
                 os.remove(file_path)
@@ -108,8 +131,16 @@ if __name__ == "__main__":
     path = r"C:\Users\User\Documents\2024\project\figures"
 
     data = import_h5py(file)
-    mean = o_mean(data)
-    plotting_mean_specturms(mean, path)
+
+    mean_real = o_mean(data[1])
+    mean_complex = o_mean(data=data[2])
+
+    plotting_mean_specturms(data=mean_real, saving_path=path)
+    # plotting_mean_specturms(data=mean_complex, saving_path=path)
+
+    # for data_type in data:
+    #     mean = o_mean(data_type)
+    #     plotting_mean_specturms(mean, path)
 
 
 """
