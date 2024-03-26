@@ -37,28 +37,42 @@ def extract_coeff(data):  # is good, but would be better if faster
     return coeff
 
 
-def data_processing(data):  # works
-
+def data_processing(data):
     modulus_data = []
+    real_data = []
+    complex_data = []
 
-    for sublist in data:
+    for sublist in tqdm(data):
         modulus_sublist = [np.sqrt((i[0]) ** 2 + (i[1]) ** 2) for i in sublist]
         modulus_data.append(modulus_sublist)
+        real_data.append([i[0] for i in sublist])
+        complex_data.append([i[1] for i in sublist])
 
     print("Finished modulus calculations")
-    return modulus_data
+
+    modulus_data = np.array(modulus_data)
+    real_data = np.array(real_data)
+    complex_data = np.array(complex_data)
+
+    print(modulus_data.shape, real_data.shape, complex_data.shape)
+    print(modulus_data[:2], real_data[:2], complex_data[:2])
+
+    return modulus_data, real_data, complex_data
 
 
-def saving_h5py(modulus_data, output_file):
-
+def saving_h5py(modulus_data, real_data, complex_data, output_file):
     with h5py.File(output_file, "w") as hf:
-        for i, moduli in enumerate(modulus_data):
-            grp = hf.create_group(f"Cofficient_index_{i+1}")
-            grp.create_dataset(f"Moduli_coeff_{i+1}", data=moduli)
+        for i, (moduli, real, complex) in tqdm(
+            enumerate(zip(modulus_data, real_data, complex_data))
+        ):
+            grp = hf.create_group(f"Coefficient_index_{i+1}")
+            grp.create_dataset(f"Modulus_coeff_{i+1}", data=moduli)
+            # grp.create_dataset(f"Real_coeff_{i+1}", data=real)
+            # grp.create_dataset(f"Complex_coeff_{i+1}", data=complex)
 
             coeff_t = 30
             if i == coeff_t:
-                print(f"Saved all coefficient {i+1}")
+                print(f"Saved all coefficients up to index {i}")
 
 
 def read_h5py(input_file):
@@ -79,11 +93,17 @@ def create_data():
 
     coeff = extract_coeff(txt_lines)
 
-    modulus_data = data_processing(coeff)
+    separated_data = data_processing(coeff)
 
     output_directory = "./Data"
     output_file = os.path.join(output_directory, "Measurement_of_2021-06-18_1825.h5")
-    saving_h5py(modulus_data, output_file)
+
+    saving_h5py(
+        modulus_data=separated_data[0],
+        real_data=separated_data[1],
+        complex_data=separated_data[2],
+        output_file=output_file,
+    )
     return output_file
 
 
@@ -96,7 +116,6 @@ def ask_user_action():
             file = input("Enter what is the h5 file that you would like to read: ")
             read_h5py(file)
         elif user_input in ["create", "C", "c"]:
-            file = input("Enter what txt file would you like to convert to a h5 file: ")
             output_file = create_data()
             print(f"A new h5 file has be create called {output_file}")
         elif user_input in ["E", "end", "e"]:
