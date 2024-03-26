@@ -96,7 +96,7 @@ def read_h5py(input_file):
 
 
 def create_data():
-    file = "./project_data/Measurement_of_2021-06-18_1825.txt"
+    file = "./project_data/Measurement_of_2021-06-18_1825.txt"  # generalise
     start_line, end_line = 14, 14000014
     txt_lines = read_batch(file, start_line, end_line)
 
@@ -105,7 +105,9 @@ def create_data():
     separated_data = data_processing(coeff)
 
     output_directory = "./project_data"
-    output_file = os.path.join(output_directory, "Measurement_of_2021-06-18_1825.h5")
+    output_file = os.path.join(
+        output_directory, "Measurement_of_2021-06-18_1825.h5"
+    )  # generalise
 
     saving_h5py(
         modulus_data=separated_data[0],
