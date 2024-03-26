@@ -3,8 +3,17 @@ import numpy as np
 import os
 from tqdm.auto import tqdm
 
-directory_path = r"C:\Users\User\Documents\2024\project"
-os.chdir(directory_path)
+directory_path = [
+    r"C:\Users\User\Documents\2024\project",
+    r"C:\Users\Patrick Van Workum\Documents\Python scripts",
+]
+
+
+for file in directory_path:
+    try:
+        os.chdir(file)
+    except FileNotFoundError:
+        print("Not Valid file path")
 
 
 def read_batch(file_path, start_cut, end_cut):
@@ -67,8 +76,8 @@ def saving_h5py(modulus_data, real_data, complex_data, output_file):
         ):
             grp = hf.create_group(f"Coefficient_index_{i+1}")
             grp.create_dataset(f"Modulus_coeff_{i+1}", data=moduli)
-            # grp.create_dataset(f"Real_coeff_{i+1}", data=real)
-            # grp.create_dataset(f"Complex_coeff_{i+1}", data=complex)
+            grp.create_dataset(f"Real_coeff_{i+1}", data=real)
+            grp.create_dataset(f"Complex_coeff_{i+1}", data=complex)
 
             coeff_t = 30
             if i == coeff_t:
@@ -87,7 +96,7 @@ def read_h5py(input_file):
 
 
 def create_data():
-    file = "./Data/Measurement_of_2021-06-18_1825.txt"
+    file = "./project_data/Measurement_of_2021-06-18_1825.txt"
     start_line, end_line = 14, 14000014
     txt_lines = read_batch(file, start_line, end_line)
 
@@ -95,7 +104,7 @@ def create_data():
 
     separated_data = data_processing(coeff)
 
-    output_directory = "./Data"
+    output_directory = "./project_data"
     output_file = os.path.join(output_directory, "Measurement_of_2021-06-18_1825.h5")
 
     saving_h5py(
