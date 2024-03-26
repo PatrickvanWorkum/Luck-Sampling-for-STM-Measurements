@@ -5,20 +5,43 @@ import numpy as np
 from tqdm.auto import tqdm
 import h5py
 
+directory_path = [
+    r"C:\Users\User\Documents\2024\project",
+    r"C:\Users\Patrick Van Workum\Documents\Python scripts",
+]
 
-directory_path = r"C:\Users\User\Documents\2024\project"
-os.chdir(directory_path)
+
+for file in directory_path:
+    try:
+        os.chdir(file)
+    except FileNotFoundError:
+        print("Not Valid file path")
 
 
 def import_h5py(input_file):
-    data = []
+    moduli = []
+    real = []
+    complex = []
     with h5py.File(input_file, "r") as hf:
-        for key in hf.keys():
-            dataset = hf[key]
-            for subkey in dataset.keys():
-                data.append(dataset[subkey][:])
+        for i in range(31):
+            moduli.append(hf[f"/Coefficient_index_{i+1}/Modulus_coeff_{i+1}"][()])
+            real.append(hf[f"/Coefficient_index_{i+1}/Real_coeff_{i+1}"][()])
+            complex.append(hf[f"/Coefficient_index_{i+1}/Complex_coeff_{i+1}"][()])
 
+    data = [moduli] + [real] + [complex]
+    data = np.array(data)
     return data
+
+
+# def import_h5py(input_file):
+#     data = []
+#     with h5py.File(input_file, "r") as hf:
+#         for key in hf.keys():
+#             dataset = hf[key]
+#             for subkey in dataset.keys():
+#                 data.append(dataset[subkey][:])
+
+#     return data
 
 
 def extract_per_pixel(data, pixels_co, sampling_rate=160):
@@ -75,7 +98,7 @@ def plot_binned_data(data, MULTI_PIXEL_CHECK, saving_path):
             plt.legend()
 
             if (i + 1) % 3 == 0:
-                # plt.show()
+                plt.show()
                 file_path = os.path.join(
                     saving_path,
                     f"coefficient_{i-1}&{i}&{i+1}_histogram_pixel_{PIXEL[0]}{PIXEL[1]}_bin{BIN_NO}.png",
@@ -86,6 +109,7 @@ def plot_binned_data(data, MULTI_PIXEL_CHECK, saving_path):
                 plt.savefig(file_path)
                 plt.clf()
                 # implement multi pixel plotting
+                pass
 
             if i == 30:
                 plt.show()
@@ -111,5 +135,10 @@ if __name__ == "__main__":
     PIXEL_DIM = 50
 
     data = import_h5py(FILE)
-    f_data = extract_per_pixel(data, PIXEL)
-    plot_binned_data(f_data[0], f_data[1], PATH)
+    data = np.array(data)
+
+    real_f_data = extract_per_pixel(data[1], PIXEL)
+    complex_f_data = extract_per_pixel(data[2], PIXEL)
+
+    plot_binned_data(real_f_data[0], real_f_data[1], PATH)
+    plot_binned_data(complex_f_data[0], complex_f_data[1], PATH)
