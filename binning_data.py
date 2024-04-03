@@ -1,3 +1,6 @@
+# This has been moved to new class set up.
+
+
 import os
 import matplotlib.pyplot as plt
 from scipy.stats import norm, poisson
@@ -125,10 +128,10 @@ if __name__ == "__main__":
     NO_COEFF = 31
 
     data = import_h5py(input_file=file, no_coeff=NO_COEFF)
-    data = np.array(data)
 
     real_f_data = extract_per_pixel(data[1], PIXEL)
+    print(real_f_data[2])
     complex_f_data = extract_per_pixel(data[2], PIXEL)
 
-    plot_binned_data(real_f_data[0], real_f_data[1], path)
+    # plot_binned_data(real_f_data[0], real_f_data[1], path)
     plot_binned_data(complex_f_data[0], complex_f_data[1], path)
