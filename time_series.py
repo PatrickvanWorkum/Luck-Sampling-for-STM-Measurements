@@ -25,8 +25,8 @@ class Dataset:
         self.pixel = pixels
         self.row_no, self.col_no = self.pixel
         self.pixels_dim = pixel_dim
-        self.data = self.import_h5py()
         self.pixels = self.pixel_check()
+        self.data = self.import_h5py()
         self.saving_path = saving_path
 
     def import_h5py(self):
@@ -41,6 +41,19 @@ class Dataset:
 
         data = [moduli] + [real] + [complex]
         data = np.array(data)
+
+        pixel_slices = []
+        for pixel in self.pixels:
+            slices = []
+            for i in range(data.shape[1]):
+                sliced_data = data[1:, i, pixel : pixel + 160]
+                slices.append(sliced_data)
+
+            pixel_slices.append(slices)
+
+        data = np.array(pixel_slices)
+        data = np.transpose(data, (0, 2, 1, 3))
+
         return data
 
     def pixel_check(self):
@@ -54,19 +67,7 @@ class Dataset:
         return idx_nos
 
     def time_series_plot(self):
-        pixel_slices = []
-        for pixel in self.pixels:
-            slices = []
-            for i in range(self.data.shape[1]):
-                sliced_data = self.data[1:, i, pixel : pixel + 160]
-                slices.append(sliced_data)
-
-            pixel_slices.append(slices)
-
-        pixel_time_series = np.array(pixel_slices)
-        pixel_time_series = np.transpose(pixel_time_series, (0, 2, 1, 3))
-
-        for idx, pixel in enumerate(pixel_time_series):
+        for idx, pixel in enumerate(self.data):
             for j, data_type in enumerate(pixel):
 
                 if j == 0:
@@ -111,19 +112,7 @@ class Dataset:
     def plot_binned_data(self):
         BIN_NO = 20
 
-        pixel_slices = []
-        for pixel in self.pixels:
-            slices = []
-            for i in range(self.data.shape[1]):
-                sliced_data = self.data[1:, i, pixel : pixel + 160]
-                slices.append(sliced_data)
-
-            pixel_slices.append(slices)
-
-        pixel_time_series = np.array(pixel_slices)
-        pixel_time_series = np.transpose(pixel_time_series, (0, 2, 1, 3))
-
-        for idx, pixel in enumerate(pixel_time_series):
+        for idx, pixel in enumerate(self.data):
             for j, pixel_data in enumerate(pixel):
 
                 if j == 0:
@@ -199,4 +188,5 @@ if __name__ == "__main__":
         saving_path=path,
     )
 
-    dataset.plot_binned_data()
+    dataset.time_series_plot()
+    # dataset.plot_binned_data()
