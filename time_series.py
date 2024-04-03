@@ -18,7 +18,118 @@ for file in directory_path:
         print("Not Valid file path")
 
 
-class Dataset:
+class original_plotting:
+    def __init__(self, file_name, no_coeff, pixel_dim, saving_path):
+        self.file_name = file_name
+        self.no_coeff = no_coeff
+        self.pixels_dim = pixel_dim
+        self.data = self.import_h5py()
+        self.saving_path = saving_path
+        self.mean_data = self.o_mean()
+
+    def import_h5py(self):
+        moduli = []
+        real = []
+        complex = []
+        with h5py.File(self.file_name, "r") as hf:
+            for i in range(self.no_coeff):
+                moduli.append(hf[f"/Coefficient_index_{i+1}/Modulus_coeff_{i+1}"][()])
+                real.append(hf[f"/Coefficient_index_{i+1}/Real_coeff_{i+1}"][()])
+                complex.append(hf[f"/Coefficient_index_{i+1}/Complex_coeff_{i+1}"][()])
+
+        data = [moduli] + [real] + [complex]
+        data = np.array(data)
+
+        return data
+
+    def o_mean(self):
+        mean_data = []
+        count = 0
+        sums = 0
+        for data_types in tqdm(self.data):
+            data_type = []
+            for coeff_data in data_types:
+                coeff_mean = []
+                for value in coeff_data:
+                    sums += value
+                    count += 1
+                    if count == sampling_rate:
+                        coeff_mean.append(sums / count)
+                        count, sums = 0, 0
+
+                data_type.append(coeff_mean)
+
+            mean_data.append(data_type)
+
+        mean_data = np.array(mean_data)
+        return mean_data
+
+    def plotting_mean_specturms(self):
+
+        ticks = (1, 10, 20, 30, 40, 50)
+
+        for count, data_type in enumerate(self.mean_data[1:, :, :]):
+
+            if count == 0:
+                type = "real"
+            elif count == 1:
+                type = "complex"
+
+            r_data = [
+                np.reshape(sublist, (self.pixels_dim, self.pixels_dim))
+                for sublist in data_type
+            ]
+
+            if not os.path.exists(self.saving_path):
+                os.makedirs(self.saving_path)
+
+            plt.figure(figsize=(8, 6))
+            for i, values in tqdm(enumerate(r_data)):
+
+                min_parameter = 0
+                max_parameter = np.median(values) + 3 * np.std(values)
+
+                plt.subplot(1, 2, i % 2 + 1)
+                plt.imshow(
+                    values[::-1],
+                    vmin=min_parameter,
+                    vmax=max_parameter,
+                    cmap="gray",
+                    extent=(0.5, self.pixels_dim + 0.5, 0.5, self.pixels_dim + 0.5),
+                )
+                plt.colorbar()
+                plt.title(f"Coefficients {i+1}")
+                plt.xlabel("Pixels")
+                plt.ylabel("Pixels")
+                plt.xticks(ticks, ticks)
+                plt.xlim(1, self.pixels_dim)
+                plt.yticks(ticks, ticks)
+                plt.ylim(1, self.pixels_dim)
+                plt.tight_layout()
+                plt.grid(visible=False)
+
+                if i % 2 == 1:
+                    file_path = os.path.join(
+                        self.saving_path,
+                        f"coefficient_{i}&{i+1}_median_values_harmonics_r_{type}.png",
+                    )
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+
+                    plt.savefig(file_path)
+                    plt.clf()
+                if i == 30:
+                    file_path = os.path.join(
+                        self.saving_path,
+                        f"coefficient_{i+1}_median_values_harmonics_r_{type}.png",
+                    )
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+
+                    plt.savefig(file_path)
+
+
+class Dataset_analysis:
     def __init__(self, file_name, no_coeff, pixels, pixel_dim, saving_path):
         self.file_name = file_name
         self.no_coeff = no_coeff
@@ -46,7 +157,9 @@ class Dataset:
         for pixel in self.pixels:
             slices = []
             for i in range(data.shape[1]):
-                sliced_data = data[1:, i, pixel : pixel + 160]
+                sliced_data = data[
+                    1:, i, pixel : pixel + 160
+                ]  # change to including moduli
                 slices.append(sliced_data)
 
             pixel_slices.append(slices)
@@ -180,7 +293,7 @@ if __name__ == "__main__":
     PIXEL_DIM = 50
     NO_COEFF = 31
 
-    dataset = Dataset(
+    dataset = Dataset_analysis(
         file_name=file,
         pixels=PIXEL,
         no_coeff=NO_COEFF,
@@ -188,5 +301,9 @@ if __name__ == "__main__":
         saving_path=path,
     )
 
-    dataset.time_series_plot()
+    dataset_original = original_plotting(
+        file_name=file, no_coeff=NO_COEFF, pixel_dim=PIXEL_DIM, saving_path=path
+    )
+
+    dataset_original.plotting_mean_specturms()
     # dataset.plot_binned_data()
