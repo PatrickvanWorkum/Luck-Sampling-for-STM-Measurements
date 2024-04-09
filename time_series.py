@@ -196,7 +196,9 @@ class Dataset_analysis:
                     plt.plot(x, coeff)
                     plt.xlabel("Index")
                     plt.ylabel("Values")
-                    plt.title(f"Coefficient_{i+1}")
+                    plt.title(
+                        f"Coef {i+1}, Pixel: row {self.row_no[idx]}, col {self.col_no[idx]}"
+                    )
 
                     if (i + 1) % 4 == 0:
                         plt.tight_layout()
@@ -221,6 +223,19 @@ class Dataset_analysis:
 
                         plt.savefig(file_path)
                         plt.clf()
+
+                    # if i == 3:
+                    #     plt.tight_layout()
+                    #     file_path = os.path.join(
+                    #         self.saving_path,
+                    #         f"coefficient_{i-2}&{i-1}&{i}&{i+1}_{type}_pixel{self.row_no[idx]}{self.col_no[idx]}.png",
+                    #     )
+                    #     if os.path.exists(file_path):
+                    #         os.remove(file_path)
+
+                    #     plt.savefig(file_path)
+                    #     plt.clf()
+                    #     break
 
     def plot_binned_data(self):
         BIN_NO = 20
@@ -287,23 +302,19 @@ if __name__ == "__main__":
 
     file = "./Data/Measurement_of_2021-06-18_1825.h5"
     path = r"C:\Users\User\Documents\2024\project\test_figures"
-    PIXEL = [[2, 2, 3], [1, 2, 3]]
+    PIXEL = [[2, 2], [1, 2]]
     PIXEL2 = [[2], [1]]
+    PIXELR = [np.random.randint(2, 49, size=13).tolist() for _ in range(2)]
     sampling_rate = 160
     PIXEL_DIM = 50
     NO_COEFF = 31
 
     dataset = Dataset_analysis(
         file_name=file,
-        pixels=PIXEL,
+        pixels=PIXELR,
         no_coeff=NO_COEFF,
         pixel_dim=PIXEL_DIM,
         saving_path=path,
     )
 
-    dataset_original = original_plotting(
-        file_name=file, no_coeff=NO_COEFF, pixel_dim=PIXEL_DIM, saving_path=path
-    )
-
-    dataset_original.plotting_mean_specturms()
-    # dataset.plot_binned_data()
+    dataset.time_series_plot()
