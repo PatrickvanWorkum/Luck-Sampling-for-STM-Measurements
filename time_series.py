@@ -277,7 +277,7 @@ class Dataset_analysis:
                     if (i + 1) % 3 == 0:
                         file_path = os.path.join(
                             self.saving_path,
-                            f"coefficient_{i-1}&{i}&{i+1}_{type}_histogram_pixel_{self.row_no[idx]}{self.col_no[idx]}_complex.png",
+                            f"coefficient_{i-1}&{i}&{i+1}_{type}_histogram_pixel_{self.row_no[idx]}{self.col_no[idx]}.png",
                         )
                         if os.path.exists(file_path):
                             os.remove(file_path)
@@ -288,7 +288,7 @@ class Dataset_analysis:
                     if i == 30:
                         file_path = os.path.join(
                             self.saving_path,
-                            f"coefficient_{i+1}_{type}_histogram_pixel_{self.row_no[idx]}{self.col_no[idx]}_complex.png",
+                            f"coefficient_{i+1}_{type}_histogram_pixel_{self.row_no[idx]}{self.col_no[idx]}.png",
                         )
                         if os.path.exists(file_path):
                             os.remove(file_path)
@@ -297,24 +297,72 @@ class Dataset_analysis:
 
                         plt.clf()
 
+    def correlation(self):
+        for index_pixel, pixel in enumerate(self.data):
+
+            for index_type, datatype in enumerate(pixel):
+
+                if index_type == 0:
+                    type = "Real"
+                if index_type == 1:
+                    type = "Complex"
+
+                COEFFICIENT_1 = datatype[0]
+                count_max = len(datatype[1]) + 1
+                counts = [i for i in range(1, count_max)]
+
+                for index, coefficient in enumerate(datatype):
+                    correlation = coefficient - COEFFICIENT_1
+                    if index == 0:
+                        pass
+                    else:
+                        plt.plot(counts, correlation, label=f"Coefficient_{index+1}")
+
+                        if index % 5 == 0:
+                            plt.xlabel("Index")
+                            plt.ylabel("Correlation")
+                            plt.legend(fontsize="x-small")
+                            plt.title(
+                                f"Correlation between coefficent 1 and {index-3}-{index+1}"
+                            )
+                            file_path = os.path.join(
+                                self.saving_path,
+                                f"Correlation_1_&_{index-3}-{index+1}_{self.row_no[index_pixel]}{self.col_no[index_pixel]}_{type}.png",
+                            )
+                            if os.path.exists(file_path):
+                                os.remove(file_path)
+
+                            plt.savefig(file_path)
+                            plt.clf()
+
+        print("All correlations are calculation.")
+
 
 if __name__ == "__main__":
 
     file = "./Data/Measurement_of_2021-06-18_1825.h5"
     path = r"C:\Users\User\Documents\2024\project\test_figures"
-    PIXEL = [[2, 2], [1, 2]]
-    PIXEL2 = [[2], [1]]
-    PIXELR = [np.random.randint(2, 49, size=13).tolist() for _ in range(2)]
     sampling_rate = 160
     PIXEL_DIM = 50
     NO_COEFF = 31
 
-    dataset = Dataset_analysis(
-        file_name=file,
-        pixels=PIXELR,
-        no_coeff=NO_COEFF,
-        pixel_dim=PIXEL_DIM,
-        saving_path=path,
-    )
+    PIXEL = [[2, 2], [1, 2]]
+    PIXEL2 = [[3], [4]]
+    PIXELR = [np.random.randint(2, 49, size=13).tolist() for _ in range(2)]
 
-    dataset.time_series_plot()
+    for i in range(len(PIXELR[0])):
+        folder_name = f"Pixel_{PIXELR[0][i]},{PIXELR[1][i]}"
+        directory_name = os.path.join(path, folder_name)
+        if not os.path.exists(directory_name):
+            os.makedirs(directory_name)
+
+        dataset = Dataset_analysis(
+            file_name=file,
+            pixels=[[PIXELR[0][i]], [PIXELR[1][i]]],
+            no_coeff=NO_COEFF,
+            pixel_dim=PIXEL_DIM,
+            saving_path=directory_name,
+        )
+
+        dataset.correlation()
+        dataset.time_series_plot()
