@@ -3,6 +3,7 @@ import h5py
 import os
 import matplotlib.pyplot as plt
 from scipy.stats import norm, poisson
+from scipy.signal import correlate
 from tqdm.auto import tqdm
 
 directory_path = [
@@ -297,7 +298,31 @@ class Dataset_analysis:
 
                         plt.clf()
 
-    def correlation(self):
+    @staticmethod
+    def sin_fitting(x, y):
+        from scipy import optimize
+
+        def sin_function(x, a, b, c):
+            sin = a * np.sin(b * np.array(x) + c)
+            return sin
+
+        amplitude_guess = (np.max(y) - np.min(y)) / 2
+        frequency_guess = 1 / 3
+        phase_guess = np.pi / 2
+
+        initial_guesses = [amplitude_guess, frequency_guess, phase_guess]
+
+        limits = [0, 2 * np.pi]
+
+        params, _ = optimize.curve_fit(
+            sin_function, x, y, p0=initial_guesses, bounds=limits
+        )
+        fitted_sin = sin_function(x, *params)
+
+        return fitted_sin
+
+    def cross_correlation(self):
+
         for index_pixel, pixel in enumerate(self.data):
 
             for index_type, datatype in enumerate(pixel):
@@ -310,29 +335,48 @@ class Dataset_analysis:
                 COEFFICIENT_1 = datatype[0]
                 count_max = len(datatype[1]) + 1
                 counts = [i for i in range(1, count_max)]
+                PLOT_INDEX = 1
+
+                fig, axs = plt.subplots(2, 3, figsize=(12, 8))
 
                 for index, coefficient in enumerate(datatype):
-                    correlation = coefficient - COEFFICIENT_1
+
+                    correlation_values = correlate(
+                        COEFFICIENT_1, coefficient, mode="same"
+                    )
+                    print(
+                        f"The maximum of correlation is {max(correlation_values)} and the minimum is {min(correlation_values)}"
+                    )
                     if index == 0:
                         pass
                     else:
-                        plt.plot(counts, correlation, label=f"Coefficient_{index+1}")
+                        # sin = np.mean(
+                        #     correlation_values
+                        # ) + Dataset_analysis.sin_fitting(counts, correlation_values)
+                        plt.subplot(2, 3, PLOT_INDEX)
+                        plt.plot(
+                            counts, correlation_values, label=f"Coefficient_{index+1}"
+                        )
+                        plt.xlabel("Index")
+                        plt.ylabel("Correlation")
+                        # plt.plot(counts, sin, label="Fitted sin function", color="k")
+                        # plt.legend(fontsize="x-small")
+                        PLOT_INDEX += 1
 
-                        if index % 5 == 0:
-                            plt.xlabel("Index")
-                            plt.ylabel("Correlation")
-                            plt.legend(fontsize="x-small")
-                            plt.title(
+                        if index % 6 == 0:
+                            plt.suptitle(
                                 f"Correlation between coefficent 1 and {index-3}-{index+1}"
                             )
                             file_path = os.path.join(
                                 self.saving_path,
-                                f"Correlation_1_&_{index-3}-{index+1}_{self.row_no[index_pixel]}{self.col_no[index_pixel]}_{type}.png",
+                                f"Correlation_1_&_{index+1}_{self.row_no[index_pixel]}{self.col_no[index_pixel]}_{type}.png",
                             )
                             if os.path.exists(file_path):
                                 os.remove(file_path)
 
                             plt.savefig(file_path)
+                            plt.tight_layout()
+                            PLOT_INDEX = 1
                             plt.clf()
 
         print("All correlations are calculation.")
@@ -346,7 +390,7 @@ if __name__ == "__main__":
     PIXEL_DIM = 50
     NO_COEFF = 31
 
-    PIXEL = [[2, 2], [1, 2]]
+    PIXEL = [[2], [1]]
     PIXEL2 = [[3], [4]]
     PIXELR = [np.random.randint(2, 49, size=13).tolist() for _ in range(2)]
 
@@ -364,5 +408,13 @@ if __name__ == "__main__":
             saving_path=directory_name,
         )
 
-        dataset.correlation()
+        dataset = Dataset_analysis(
+            file_name=file,
+            pixels=PIXEL,
+            no_coeff=NO_COEFF,
+            pixel_dim=PIXEL_DIM,
+            saving_path=directory_name,
+        )
+
+        dataset.cross_correlation()
         dataset.time_series_plot()
