@@ -11,4 +11,13 @@ Important information is not encoded in periodic points but rather across a give
 It may be possible to reduce the time spent on each pixel by up to 75%, depending on the variation in the time spread.
 Work to better numerically compare the results. 
 
-![image](https://github.com/user-attachments/assets/073e3e6b-2302-46d2-b71d-87ba7edb13b5)
+![image](https://github.com/user-attachments/assets/07267e3f-fdb7-476c-8278-99d0ded9fa22)
+
+![image](https://github.com/user-attachments/assets/90bde0e3-d225-4ac3-aa24-f7118d95f175)
+
+
+![image](https://github.com/user-attachments/assets/d186dee2-d16b-4a06-88ee-82024602642d)
+
+![image](https://github.com/user-attachments/assets/55e8ed54-e88c-4e44-850d-accb8811a91a)
+
+
