@@ -8,7 +8,7 @@ from tqdm.auto import tqdm
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from scipy.fft import fft, ifft, fftfreq, fft2  # FT stuff
+from scipy.fft import fft, ifft, fftfreq, fft2, fftshift  # FT stuff
 
 mpl.use("pdf")
 plt.style.use("dqc")
@@ -49,6 +49,9 @@ class original_plotting:
         elif preprocessed_data == "2FT":
             self.data = self.import_h5py()  # Original data loading
             self.measure_data = self.FT2D()
+        elif preprocessed_data == "2FT_DICE":
+            self.data = self.import_h5py()  # Original data loading
+            self.measure_data = self.FT2D_DICE_value()
         else:
             self.data = self.import_h5py()  # Original data loading
             self.measure_data = self.measure_cal()
@@ -71,6 +74,22 @@ class original_plotting:
     @staticmethod
     def reject_outliers(data, m=3):
         return data[abs(data - np.mean(data)) < m * np.std(data)]
+
+    @staticmethod
+    def dice_coefficient(A, B):
+        A = np.asarray(A, dtype=float)  # predicted
+        B = np.asarray(B, dtype=float)  # ground truth
+
+        sum_A = np.sum(A)
+        sum_B = np.sum(B)
+
+        overlap = np.sum(np.minimum(A, B))
+
+        if sum_A + sum_B == 0:
+            return 1.0
+
+        dice = 2 * overlap / (sum_A + sum_B)
+        return dice
 
     def measure_cal(self):
         measure_data = []
@@ -103,18 +122,116 @@ class original_plotting:
             data_type = []
             for coeff_data in data_types:
                 coeff_measure = []
-                coeff_2FT = fft2(
-                    coeff_data.reshape(self.pixels_dim, self.pixels_dim, sampling_rate)
-                )
-                coeff_2FT = np.real(coeff_2FT)
-                for values in coeff_2FT.reshape(-1, 160):
+                pixeldata = [
+                    coeff_data[i : i + sampling_rate]
+                    for i in range(0, len(coeff_data), sampling_rate)
+                ]
+                pixeldata = np.array(pixeldata)
+                pixeldata = pixeldata[:, :slicefactor]
+                for values in pixeldata:
                     measure = np.mean(values)
                     coeff_measure.append(measure)
-                data_type.append(coeff_measure)
+                coeff_measure = np.array(coeff_measure)
+                coeff_2FT = fft2(
+                    coeff_measure.reshape(self.pixels_dim, self.pixels_dim)
+                )
+
+                coeff_2FT = fftshift(coeff_2FT)
+                coeff_2FT = abs(coeff_2FT)
+                data_type.append(coeff_2FT)
 
             FTdata.append(data_type)
         FTdata = np.array(FTdata)
         return FTdata
+
+    def FT2D_DICE_value(self):
+        plt.figure(figsize=(10, 6))
+        dice_values = []
+        for count, data_types in enumerate(self.data):
+            if count == 0:
+                type = "real"
+            elif count == 1:
+                type = "complex"
+            else:
+                break
+
+            for coeff_data in data_types:
+                pixeldata = [
+                    coeff_data[i : i + sampling_rate]
+                    for i in range(0, len(coeff_data), sampling_rate)
+                ]
+                pixeldata = np.array(pixeldata)
+                pixeldata_slice = pixeldata[:, slicefactor:]
+
+                coeff_measure = []
+                for values in pixeldata:
+                    measure = np.mean(values)
+                    coeff_measure.append(measure)
+                coeff_measure = np.array(coeff_measure)
+                coeff_2FT = fft2(
+                    coeff_measure.reshape(self.pixels_dim, self.pixels_dim)
+                )
+
+                coeff_2FT = fftshift(coeff_2FT)
+                coeff_2FT = abs(coeff_2FT)
+
+                Ground_True = np.array(coeff_2FT)
+
+                coeff_measure_slice = []
+                for values in pixeldata_slice:
+                    measure_slice = np.mean(values)
+                    coeff_measure_slice.append(measure_slice)
+                coeff_measure_slice = np.array(coeff_measure_slice)
+                coeff_2FT_slice = fft2(
+                    coeff_measure_slice.reshape(self.pixels_dim, self.pixels_dim)
+                )
+
+                coeff_2FT_slice = fftshift(coeff_2FT_slice)
+                coeff_2FT_slice = abs(coeff_2FT_slice)
+
+                Predicted = np.array(coeff_2FT_slice)
+
+                DICE_value = original_plotting.dice_coefficient(
+                    A=Predicted, B=Ground_True
+                )
+                dice_values.append(DICE_value)
+
+        dice_values = np.array(dice_values)
+        dice_values = dice_values.reshape(2, len(dice_values) // 2)
+
+        plt.plot(
+            range(1, 1 + len(dice_values[0])),
+            dice_values[0],
+            marker="o",
+            color="blue",
+            label="real",
+        )
+        plt.plot(
+            range(1, 1 + len(dice_values[1])),
+            dice_values[1],
+            marker="o",
+            color="green",
+            label="complex",
+        )
+        plt.title(
+            f"DICE Coefficients for Data Sliced up to {slicefactor*1/sampling_rate} seconds"
+        )
+        plt.xlabel("Sample Index")
+        plt.ylabel("DICE Value")
+        plt.grid(True)
+        plt.legend()
+
+        file_path = os.path.join(
+            self.saving_path,
+            f"DICE_slicedata_backslice{slicefactor}.pdf",
+        )
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        plt.tight_layout()
+
+        plt.savefig(file_path)
+        print(f"Plotted coefficient DICE.")
+        plt.clf()
 
     def calculate_mean_from_preprocessed(self):
         measure_data = []
@@ -204,7 +321,7 @@ class original_plotting:
 
             file_path = os.path.join(
                 self.saving_path,
-                f"all_FT_coefficients_FT2D_values_harmonics_{type}.pdf",
+                f"all_coefficients_FT2D_values_harmonics_{type}_backslice{slicefactor}.pdf",
             )
             if os.path.exists(file_path):
                 os.remove(file_path)
@@ -902,10 +1019,11 @@ def slice_plotting_real(
 if __name__ == "__main__":
 
     file = "./Data/Measurement_of_2021-06-18_1825.h5"
-    path = r"C:\Users\User\Documents\2024\project\test_figures"
+    path = r"C:\Users\User\Documents\2024\project\test_figures\PP_figures\2DFT"
     sampling_rate = 160
     PIXEL_DIM = 50
     NO_COEFF = 31
+    slicefactor = 20
 
     PIXEL = [[2], [1]]
     PIXEL2 = [[3], [4]]
@@ -919,13 +1037,13 @@ if __name__ == "__main__":
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
 
-    # original = original_plotting(
-    #     file_name=file,
-    #     no_coeff=NO_COEFF,
-    #     saving_path=path,
-    #     pixel_dim=PIXEL_DIM,
-    #     preprocessed_data="2FT",
-    # )
+    original = original_plotting(
+        file_name=file,
+        no_coeff=NO_COEFF,
+        saving_path=path,
+        pixel_dim=PIXEL_DIM,
+        preprocessed_data="2FT_DICE",
+    )
     # original.plotting_spectrums()
 
     # dataset = Dataset_analysis(
@@ -941,21 +1059,10 @@ if __name__ == "__main__":
     # slice_data = dataset.cross_correlation()
     # slice_data = dataset.time_series_plot()
 
-    filename = r"C:\Users\User\Documents\2024\project\test_figures\Pixel_all\Sliced_data_FTpeaks_sliceN1_meanvalues.hdf5"
+    # filename = r"C:\Users\User\Documents\2024\project\test_figures\Pixel_all\Sliced_data_FTpeaks_sliceN1_meanvalues.hdf5"
 
     # coefficient_indices = list(
     #     range(2, NO_COEFF + 1)
     # )  # List the coefficients you want to plot
     # coefficient_indices = np.sort(coefficient_indices)
     # slice_plotting_real(filename, coefficient_indices, plotting=True)
-
-    original = original_plotting(
-        file_name=filename,
-        no_coeff=NO_COEFF,
-        saving_path=path,
-        pixel_dim=PIXEL_DIM,
-        preprocessed_data="2FT",
-    )
-    original.plotting_spectrums()
-
-    # TODO: reapply the slicing to different dataset
