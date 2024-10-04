@@ -14,10 +14,10 @@ The major takeaways:
 Data take by Dr Berk Zengin.
 
 Sliced spectrums, at intervals compared to the full spectrum:
-![image](https://github.com/user-attachments/assets/07267e3f-fdb7-476c-8278-99d0ded9fa22)
+![image](https://github.com/user-attachments/assets/e6dff35e-8ff5-4da9-a70b-ac1db251a12f)
 
 2 dimensional Fourier Transformed sliced spectrum, compared to the 2 dimensional Fourier Transformed full spectrum
-![image](https://github.com/user-attachments/assets/114e20e4-3659-4829-bef9-9500a201ea82)
+![image](https://github.com/user-attachments/assets/deb0320f-e8af-423e-acab-b2377394a968)
 
 
 ![image](https://github.com/user-attachments/assets/d186dee2-d16b-4a06-88ee-82024602642d)
