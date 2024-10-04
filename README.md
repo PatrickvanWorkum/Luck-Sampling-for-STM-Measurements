@@ -1,19 +1,24 @@
-# Harmonic-Analysis
+## Lucky Sampling in STM measurement
 
 Contains the code used in a project working with Prof. Dr. Fabian Nattere, focused around applying lucky sampling to STM measurement data.
 
 The major takeaways:
 
-Using color mapping based on the mean ± 3 standard deviations is the most effective approach.
-The median and adjustments to the standard deviation have no noticeable impact on the results. 
-The Root Mean Squared (RMS) provides a different perspective compared to the mean or median
-Important information is not encoded in periodic points but rather across a given time spread, however further investigation into this is needed.
-It may be possible to reduce the time spent on each pixel by up to 75%, depending on the variation in the time spread.
-Work to better numerically compare the results. 
+- Using color mapping based on the mean ± 3 standard deviations is the most effective approach.
+- The median and adjustments to the standard deviation have no noticeable impact on the results. 
+- The Root Mean Squared (RMS) provides a different perspective compared to the mean or median
+- Important information is not encoded in periodic points but rather across a given time spread, however further investigation into this is needed.
+- It may be possible to reduce the time spent on each pixel by up to 75%, depending on the variation in the time spread. One would want to conmplete analysis on another propers running for longer and shorter times.
+- Work to better numerically compare the results; one, would want to look at matching 2D FT features across the spectrums to see. The removal of background noise may help with this
 
+Data take by Dr Berk Zengin.
+
+Sliced spectrums, at intervals compared to the full spectrum:
 ![image](https://github.com/user-attachments/assets/07267e3f-fdb7-476c-8278-99d0ded9fa22)
 
-![image](https://github.com/user-attachments/assets/55b79e4a-0c4c-42db-aa77-7c2f85fd0530)
+2 dimensional Fourier Transformed sliced spectrum, compared to the 2 dimensional Fourier Transformed full spectrum
+![image](https://github.com/user-attachments/assets/114e20e4-3659-4829-bef9-9500a201ea82)
+
 
 ![image](https://github.com/user-attachments/assets/d186dee2-d16b-4a06-88ee-82024602642d)
 
