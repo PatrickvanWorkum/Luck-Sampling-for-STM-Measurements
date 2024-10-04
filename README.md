@@ -1,27 +1,86 @@
-## Lucky Sampling in STM measurement
+# Lucky Sampling in STM Measurement
 
-Contains the code used in a project working with Prof. Dr. Fabian Nattere, focused around applying lucky sampling to STM measurement data.
+This repository contains the code used in a project in collaboration with **Prof. Dr. Fabian Nattere**, focused on applying lucky sampling to STM (Scanning Tunneling Microscopy) measurement data.
 
-The major takeaways:
+### Major Takeaways
 
-- Using color mapping based on the mean ± 3 standard deviations is the most effective approach.
-- The median and adjustments to the standard deviation have no noticeable impact on the results. 
-- The Root Mean Squared (RMS) provides a different perspective compared to the mean or median
-- Important information is not encoded in periodic points but rather across a given time spread, however further investigation into this is needed.
-- It may be possible to reduce the time spent on each pixel by up to 75%, depending on the variation in the time spread. One would want to conmplete analysis on another propers running for longer and shorter times.
-- Work to better numerically compare the results; one, would want to look at matching 2D FT features across the spectrums to see. The removal of background noise may help with this
+- **Using color mapping** based on the mean ± 3 standard deviations is the most effective approach.
+- Adjusting the **median** and **standard deviation** has no noticeable impact on the results.
+- **Root Mean Squared (RMS)** provides a different perspective compared to the mean or median.
+- **Important information** is not encoded in periodic points but is spread over a given time frame. Further investigation is needed to confirm this.
+- **Reducing the time spent** on each pixel by up to 50% might be possible depending on the variation in the time spread. Further analysis is required for longer and shorter time experiments.
+- To **better compare results numerically**, it would be useful to look at matching **2D Fourier Transform (FT)** features across the spectrums. Removing background noise might assist in this analysis.
 
-Data take by Dr Berk Zengin.
+---
 
-Sliced spectrums, at intervals compared to the full spectrum:
-![image](https://github.com/user-attachments/assets/e6dff35e-8ff5-4da9-a70b-ac1db251a12f)
+### Data Information
 
-2 dimensional Fourier Transformed sliced spectrum, compared to the 2 dimensional Fourier Transformed full spectrum
-![image](https://github.com/user-attachments/assets/deb0320f-e8af-423e-acab-b2377394a968)
+- **Data collected by**: Dr. Berk Zengin
+- **Date of experiment**: 18/06/2021
+- **Dataset**: Contains 24.8 million points or 155,000 after averaging.
+- **Experiment details**:
+  - 50x50 pixels with 31 real and complex coefficients
+  - Each pixel has 160 data points captured over 0.1 seconds
+- **Plots**: Represent the mean value of pixels for each coefficient, with color mapping bound by ±3 standard deviations.
+
+---
+
+### Visuals
+
+#### Sliced Spectrums
+- Sliced spectrums, at intervals compared to the full spectrum:
+
+![Sliced Spectrum](https://github.com/user-attachments/assets/e6dff35e-8ff5-4da9-a70b-ac1db251a12f)
+
+#### 2D Fourier Transformed Spectrum
+- 2D Fourier Transformed sliced spectrum, compared to the full 2D Fourier Transformed spectrum:
+
+![2D FT Spectrum](https://github.com/user-attachments/assets/deb0320f-e8af-423e-acab-b2377394a968)
+
+#### Dice Coefficients (Sliced Up to the Middle Point)
+- Dice coefficients across all coefficients when data is sliced up to the middle (80 data points):
+
+![Dice Coefficients (First Half)](https://github.com/user-attachments/assets/db9d1a06-d31a-4e2a-97aa-6f2f55442352)
+
+#### Dice Coefficients (Sliced From the Middle Point)
+- Dice coefficients across all coefficients when data is sliced from the middle point (80 data points):
+
+![Dice Coefficients (Second Half)](https://github.com/user-attachments/assets/66970e58-5596-4064-901a-c62fc0ecbe8c)
+
+---
+
+### Future Work
+
+- Conduct further experiments to analyze the variation in the time spread.
+- Investigate matching **2D FT features** across spectrums.
+- Explore ways to remove background noise to improve the clarity of results.
+
+---
+
+### Raw Fourier Signal Analysis
+
+While **Fourier analysis on the raw spectrum** was initially explored, it turned out to be a dead end. However, I encourage the reader to take a look at the code for further insights.
+
+![image](https://github.com/user-attachments/assets/fdc812f3-18aa-46c6-93be-74b83c5f9329)
+
+---
+
+### General Steps
+
+The following are the general steps used for signal analysis:
+
+1. **Correlate Coefficient 1** with other coefficients and subtract off Coefficient 1.
+2. **Apply a Fourier Transform (FT)** on the data to extract the major frequencies.
+3. **Create a new signal** in the frequency domain using these frequencies.
+4. **Reverse** the newly created signal back into the time domain.
+5. **Slicing original data** based on this signal and plotting the result
+---
+
+![image](https://github.com/user-attachments/assets/ae8f3252-cf50-4a84-99d9-f23209bac563)
 
 
-![image](https://github.com/user-attachments/assets/d186dee2-d16b-4a06-88ee-82024602642d)
+Feel free to explore the code and experiment with different approaches based on these steps!
 
-![image](https://github.com/user-attachments/assets/55e8ed54-e88c-4e44-850d-accb8811a91a)
+
 
 
