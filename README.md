@@ -1,6 +1,6 @@
 # Lucky Sampling in STM Measurement
 
-This repository contains the code used in a project in collaboration with **Prof. Dr. Fabian Nattere**, focused on applying lucky sampling to STM (Scanning Tunneling Microscopy) measurement data.
+This repository contains the code used in a project in collaboration with **Prof. Dr. Fabian Natterer**, focused on applying lucky sampling to STM (Scanning Tunneling Microscopy) measurement data.
 
 ### Major Takeaways
 
