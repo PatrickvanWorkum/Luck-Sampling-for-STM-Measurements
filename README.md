@@ -23,6 +23,10 @@ This repository contains the code used in a project in collaboration with **Prof
   - Each pixel has 160 data points captured over 0.1 seconds
 - **Plots**: Represent the mean value of pixels for each coefficient, with color mapping bound by ±3 standard deviations.
 
+![image](https://github.com/user-attachments/assets/fa9d6103-4870-4b91-aa3d-18399363868f)
+
+*Coefficients plotted are from 1 to 12 real components.*
+
 ---
 
 ### Visuals
@@ -59,28 +63,7 @@ This repository contains the code used in a project in collaboration with **Prof
 
 ### Raw Fourier Signal Analysis
 
-While **Fourier analysis on the raw spectrum** was initially explored, it turned out to be a dead end. However, I encourage the reader to take a look at the code for further insights.
-
-![image](https://github.com/user-attachments/assets/fdc812f3-18aa-46c6-93be-74b83c5f9329)
-
----
-
-### General Steps
-
-The following are the general steps used for signal analysis:
-
-1. **Correlate Coefficient 1** with other coefficients and subtract off Coefficient 1.
-2. **Apply a Fourier Transform (FT)** on the data to extract the major frequencies.
-3. **Create a new signal** in the frequency domain using these frequencies.
-4. **Reverse** the newly created signal back into the time domain.
-5. **Slicing original data** based on this signal and plotting the result
----
-
-![image](https://github.com/user-attachments/assets/ae8f3252-cf50-4a84-99d9-f23209bac563)
-
-
-Feel free to explore the code and experiment with different approaches based on these steps!
-
+While **Fourier analysis on the raw spectrum** was initially explored, it turned out to be a dead end. However, I
 
 
 
