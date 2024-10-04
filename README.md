@@ -13,8 +13,7 @@ Work to better numerically compare the results.
 
 ![image](https://github.com/user-attachments/assets/07267e3f-fdb7-476c-8278-99d0ded9fa22)
 
-![image](https://github.com/user-attachments/assets/90bde0e3-d225-4ac3-aa24-f7118d95f175)
-
+![image](https://github.com/user-attachments/assets/55b79e4a-0c4c-42db-aa77-7c2f85fd0530)
 
 ![image](https://github.com/user-attachments/assets/d186dee2-d16b-4a06-88ee-82024602642d)
 
